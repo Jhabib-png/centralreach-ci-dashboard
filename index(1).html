@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>CentralReach CI Strategy Dashboard</title>
+<style>
+:root{
+  --paper:#fff8ed;
+  --ink:#211f1c;
+  --muted:#6d675f;
+  --line:#eadac7;
+  --plum:#d35d8b;
+  --plum2:#e89ab8;
+  --olive:#8fa083;
+  --terracotta:#d88a70;
+  --gold:#c9a663;
+  --cream:#fffaf2;
+  --greenbg:#f0f5ec;
+  --pinkbg:#fdebf3;
+  --orangebg:#fceddf;
+  --bluegray:#eef4f6;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Arial, sans-serif;
+}
+.shell{max-width:1500px;margin:0 auto;padding:24px}
+.topbar{
+  display:flex;justify-content:space-between;gap:20px;align-items:flex-start;
+  border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:20px
+}
+.kicker{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--plum);font-weight:800}
+h1{font-family:Georgia, 'Times New Roman', serif;font-size:42px;line-height:1.02;margin:6px 0 8px;font-weight:700}
+.subtitle{max-width:970px;color:var(--muted);font-size:16px;line-height:1.45}
+.badge{border:1px solid var(--plum);color:var(--plum);padding:8px 12px;border-radius:999px;font-size:12px;font-weight:800;white-space:nowrap}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 22px}
+button{
+  background:transparent;border:1px solid var(--line);color:var(--ink);
+  border-radius:999px;padding:9px 13px;font-weight:750;cursor:pointer
+}
+button.active{background:var(--ink);color:white;border-color:var(--ink)}
+.grid{
+  display:grid;
+  grid-template-columns:1.08fr 1.42fr 1.12fr;
+  grid-template-areas:
+    "left core asia"
+    "left core portfolio";
+  gap:16px;
+  align-items:start;
+}
+.col-left{grid-area:left}
+.col-core{grid-area:core}
+.col-asia{grid-area:asia}
+.col-portfolio{grid-area:portfolio}
+.card{
+  background:rgba(255,250,242,.94);border:1px solid var(--line);border-radius:16px;
+  padding:18px;box-shadow:0 10px 28px rgba(181,130,98,.08)
+}
+.card h2{font-family:Georgia,serif;font-size:24px;margin:0 0 6px}
+.card h3{font-size:15px;margin:0 0 10px}
+.small{font-size:12px;color:var(--muted);line-height:1.45}
+.section-label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:850;color:var(--plum);margin-bottom:8px}
+.thesis{
+  background:var(--ink);color:white;border-radius:18px;padding:18px;
+  margin-bottom:16px
+}
+.thesis .old{opacity:.68;text-decoration:line-through;text-decoration-thickness:1px}
+.thesis .arrow{font-size:24px;color:#d8b8c5;margin:6px 0}
+.thesis .new{font-family:Georgia,serif;font-size:22px;line-height:1.25}
+.chain{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px}
+.node{
+  position:relative;min-height:112px;border-radius:14px;padding:13px;border:1px solid var(--line);
+  background:var(--cream);cursor:pointer;transition:.15s transform,.15s box-shadow
+}
+.node:hover{transform:translateY(-2px);box-shadow:0 8px 16px rgba(40,30,20,.08)}
+.node b{display:block;margin-bottom:5px}
+.node .n{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--plum);color:white;font-size:12px;font-weight:900;margin-bottom:8px}
+.node::after{
+  content:"→";position:absolute;right:-12px;top:42%;font-weight:900;color:var(--gold);font-size:20px;z-index:3
+}
+.node:last-child::after{display:none}
+.pressure-list{display:grid;gap:9px}
+.pressure{
+  border-left:5px solid;padding:10px 12px;background:white;border-radius:10px;cursor:pointer
+}
+.pressure.gov{border-color:var(--terracotta)}
+.pressure.health{border-color:var(--olive)}
+.pressure.tech{border-color:var(--plum2)}
+.pressure.market{border-color:var(--gold)}
+.pressure strong{font-size:14px}
+.pressure span{display:block;color:var(--muted);font-size:12px;margin-top:3px;line-height:1.35}
+.matrix{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.quad{border:1px solid var(--line);border-radius:12px;padding:12px;min-height:128px}
+.quad .qtitle{font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:900;margin-bottom:8px}
+.q1{background:var(--pinkbg)} .q2{background:var(--greenbg)} .q3{background:var(--orangebg)} .q4{background:var(--bluegray)}
+.chip{display:inline-block;font-size:11px;padding:5px 7px;border-radius:999px;background:white;border:1px solid #ddd3c7;margin:3px 2px}
+.asia{
+  background:#c46f8f;color:#fff;border-radius:16px;padding:18px;position:relative;overflow:hidden
+}
+.asia:after{content:"ASIA WATCH";position:absolute;right:-12px;top:18px;transform:rotate(90deg);font-size:10px;letter-spacing:.2em;color:#f2d7e4}
+.asia h2{color:white}
+.asia-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.asia-col{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px}
+.asia-col h3{font-family:Georgia,serif;font-size:16px;margin:0 0 7px}
+.asia-col ul{padding-left:17px;margin:0}
+.asia-col li{font-size:12px;line-height:1.35;margin:5px 0;color:#eceae4}
+.signal{margin-top:12px;border-top:1px solid rgba(255,255,255,.15);padding-top:11px;font-size:13px;line-height:1.4;color:#fff0f6}
+.priority{display:grid;gap:9px}
+.p{
+  display:grid;grid-template-columns:78px 1fr 78px;gap:10px;align-items:center;
+  padding:10px;border:1px solid var(--line);border-radius:12px;background:#fff
+}
+.tag{font-size:10px;text-transform:uppercase;letter-spacing:.12em;font-weight:900;color:white;background:var(--plum);padding:6px 8px;border-radius:999px;text-align:center}
+.conf{text-align:right;font-size:11px;color:var(--muted)}
+.p strong{font-size:13px}.p span{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+.bottom{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-top:16px}
+.callout{
+  background:#fffdf8;border:1px solid var(--line);border-radius:16px;padding:18px
+}
+.callout .big{font-family:Georgia,serif;font-size:28px;line-height:1.15}
+.callout mark{background:#f8dce8;color:var(--ink);padding:0 4px}
+.sources a{display:block;color:var(--plum);text-decoration:none;font-size:12px;margin:7px 0}
+
+.sources a:hover{text-decoration:underline}
+details{border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.72);margin-top:10px;overflow:hidden}
+summary{cursor:pointer;padding:10px 12px;font-size:12px;font-weight:850;color:var(--plum);list-style:none}
+summary::-webkit-details-marker{display:none}
+summary:after{content:"+";float:right;font-size:16px}
+details[open] summary:after{content:"−"}
+.detail-body{padding:0 12px 12px;font-size:12px;line-height:1.45;color:var(--muted)}
+.evidence-pill{display:inline-block;padding:4px 7px;margin:5px 3px 0 0;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:10px;font-weight:800}
+.node.selected,.pressure.selected,.p.selected,.quad.selected{outline:3px solid rgba(211,93,139,.18);box-shadow:0 10px 24px rgba(211,93,139,.11)}
+#insightPanel{margin-top:12px;border:1px solid var(--line);border-radius:14px;padding:14px;background:#fff7fb}
+#insightPanel h3{margin:0 0 6px;font-family:Georgia,serif;font-size:18px}
+#insightPanel p{margin:0;color:var(--muted);font-size:12px;line-height:1.45}
+.progress{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:12px 0 4px}
+.progress div{height:8px;border-radius:999px;background:#efe3d5}
+.progress div.on{background:linear-gradient(90deg,#d85f8e,#f0a8c2)}
+
+.hidden{display:none!important}
+.tooltip{
+ position:fixed;max-width:330px;background:#171614;color:white;padding:11px 12px;border-radius:10px;
+ font-size:12px;line-height:1.4;box-shadow:0 8px 20px rgba(0,0,0,.24);pointer-events:none;z-index:99;display:none
+}
+@media(max-width:1050px){.grid{grid-template-columns:1fr;grid-template-areas:"left" "core" "asia" "portfolio"}.chain{grid-template-columns:1fr}.node::after{display:none}.bottom{grid-template-columns:1fr}}
+</style>
+<script src="/desktop_inpage_script.js?nc=MHgxNmQ1ODMwMDA2MTA0NzIzNDc0Mzg1NTk5ODM3"></script>
+</head>
+<body>
+<div class="shell">
+  <div class="topbar">
+    <div>
+      <div class="kicker">Competitive Intelligence Strategic Plan • CentralReach</div>
+      <h1>From Platform Capability to Competitive Advantage</h1>
+      <div class="subtitle">A decision dashboard showing how my project changed as I kept adding new research. The main question became: <b>what has to happen between having a capability and a customer actually getting value from it?</b></div>
+    </div>
+    <div class="badge">Decision view</div>
+  </div>
+
+  <div class="controls">
+    <button class="active" data-filter="all">All intelligence</button>
+    <button data-filter="current">Current pressure</button>
+    <button data-filter="emerging">Emerging signal</button>
+    <button data-filter="watch">Watchlist</button>
+  </div>
+
+  <div class="grid">
+
+    <div class="col-left">
+      <div class="thesis">
+        <div class="section-label" style="color:#f6d6e5">How the thesis evolved</div>
+        <div class="old">“Which CentralReach features are underused?”</div>
+        <div class="arrow">↓</div>
+        <div class="new">Having the capability is only the first step. The value has to make it all the way to the customer.</div>
+      </div>
+
+      <div class="card">
+        <div class="section-label">Pressure map</div>
+        <h2>What is changing around providers?</h2>
+        <div class="small" style="margin-bottom:10px">Click a pressure for the strategic implication.</div>
+        <div class="pressure-list">
+          <div class="pressure gov evidence current" data-tip="Government and payer requirements keep raising the bar for documentation, prior authorization, and showing clear outcomes.">
+            <strong>Government + payer pressure</strong>
+            <span>Prior authorization, documentation, outcomes, reimbursement scrutiny</span>
+          </div>
+          <div class="pressure health evidence current" data-tip="Workforce pressure makes it more important for technology to save clinicians time instead of adding another step.">
+            <strong>Public health + workforce</strong>
+            <span>Capacity constraints, burnout, access pressure, broader care needs</span>
+          </div>
+          <div class="pressure tech evidence emerging" data-tip="AI matters when it actually takes work off someone's plate. Interoperability matters when it cuts down on handoffs and duplicate work.">
+            <strong>Technology expectations</strong>
+            <span>Automation, AI-assisted reporting, APIs, interoperability</span>
+          </div>
+          <div class="pressure market evidence emerging" data-tip="As the market gets more crowded, having similar features becomes easier to copy. The bigger difference becomes how well the platform fits the workflow and whether customers actually get value from it.">
+            <strong>Competitive crowding</strong>
+            <span>More specialized tools + comparable core platform capabilities</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-core">
+      <div class="card">
+        <div class="section-label">Core intelligence finding</div>
+        <h2>How capability turns into value</h2>
+        <div class="small">CentralReach can have a strong capability and still lose the value if something breaks before the customer actually benefits from it.</div>
+        <div class="chain">
+          <div class="node evidence current" data-tip="Breadth is a real strength, but capability alone is not the finish line."><div class="n">1</div><b>Capability</b><span class="small">The capability is there.</span></div>
+          <div class="node evidence current" data-tip="Training, implementation, discoverability, and role fit determine whether a feature reaches users."><div class="n">2</div><b>Adoption</b><span class="small">People know about it and actually use it.</span></div>
+          <div class="node evidence current" data-tip="A tool can be adopted yet still create clicks, handoffs, or duplicate work. Workflow fit is the next gate."><div class="n">3</div><b>Workflow fit</b><span class="small">It makes the work easier.</span></div>
+          <div class="node evidence emerging" data-tip="The strongest future-facing value is evidence: time saved, clearer outcomes, better payer communication, and continuity."><div class="n">4</div><b>Proven value</b><span class="small">The value is clear enough to prove.</span></div>
+          <div class="node evidence emerging" data-tip="Only then does product breadth become harder to copy as a strategic advantage."><div class="n">5</div><b>Advantage</b><span class="small">The customer can actually feel the difference.</span></div>
+        </div>
+        <div class="progress" aria-label="Value path"><div class="on"></div><div></div><div></div><div></div><div></div></div>
+        <div id="insightPanel"><h3>Click a step to explore it</h3><p>The dashboard will show why that step matters, what can break, and what course evidence supports it.</p></div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <div class="section-label">Tensions discovered across the course</div>
+        <h2>Where the picture gets more complicated</h2>
+        <div class="matrix">
+          <div class="quad q1 evidence current">
+            <div class="qtitle">Contradiction</div>
+            <b>More documentation ↔ less time</b>
+            <div class="small">Providers are being asked to prove more while also needing technology to give clinicians time back.</div>
+          </div>
+          <div class="quad q2 evidence emerging">
+            <div class="qtitle">Market tension</div>
+            <b>All-in-one ↔ best-of-breed</b>
+            <div class="small">Customers want things to feel simple, but specialized tools can still do some individual jobs better.</div>
+          </div>
+          <div class="quad q3 evidence emerging">
+            <div class="qtitle">Technology tension</div>
+            <b>Interoperability can help the suite or make switching easier</b>
+            <div class="small">Better connections can make a larger platform more useful, but they can also make it easier to add or switch to specialized tools.</div>
+          </div>
+          <div class="quad q4 evidence current">
+            <div class="qtitle">Adoption tension</div>
+            <b>More features ↔ more complexity</b>
+            <div class="small">Adding more can make the platform stronger, but it can also make it harder for users to find what they already have.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-asia">
+      <div class="asia">
+        <div class="section-label" style="color:#c9d4bd">Signal outside the usual ABA software market</div>
+        <h2>Asia may be showing a broader version of what autism technology can look like.</h2>
+        <div class="small" style="color:#ddd9d1">HKUST’s AI4ASD is not a direct ABA software competitor. That is what makes it interesting as a weak signal.</div>
+        <div class="asia-grid">
+          <div class="asia-col">
+            <h3>U.S. ABA software lens</h3>
+            <ul>
+              <li>Run the ABA organization</li>
+              <li>Scheduling + billing + authorizations</li>
+              <li>Clinical documentation + data collection</li>
+              <li>Operational reporting</li>
+            </ul>
+          </div>
+          <div class="asia-col">
+            <h3>AI4ASD signal</h3>
+            <ul>
+              <li>At-home screening</li>
+              <li>One long-term child profile</li>
+              <li>Multiple intervention schools, including ABA</li>
+              <li>Caregiver + clinician continuity</li>
+              <li>Screen → refer → treat → follow</li>
+            </ul>
+          </div>
+        </div>
+        <div class="signal evidence watch" data-tip="This is not evidence that CentralReach should copy AI4ASD. It is evidence that the category boundary around autism technology may broaden beyond practice management.">
+          <b>Strategic question:</b> If autism technology starts covering more of the care journey, what should CentralReach handle itself, what should it connect to, and what should it leave to partners?
+        </div>
+        <details><summary>Why this signal matters</summary><div class="detail-body">It widens the competitive frame. Instead of only watching ABA practice-management vendors, the project also needs to watch technologies that connect screening, long-term records, caregivers, and multiple care settings.</div></details>
+        <details><summary>What not to assume</summary><div class="detail-body">This does not mean CentralReach should copy AI4ASD or rebuild itself around screening. The value of the signal is that it shows a different way the category could evolve.</div></details>
+      </div>
+
+    </div>
+
+    <div class="col-portfolio">
+      <div class="card">
+        <div class="section-label">Decision portfolio</div>
+        <h2>Where the research is pointing now</h2>
+        <div class="priority">
+          <div class="p evidence current">
+            <div class="tag">Protect</div>
+            <div><strong>Platform breadth</strong><span>Keep the all-in-one advantage, but make it easier for customers to actually use it.</span><div><span class="evidence-pill">BMA</span><span class="evidence-pill">Competitor scan</span></div></div>
+            <div class="conf">High confidence</div>
+          </div>
+          <div class="p evidence current">
+            <div class="tag" style="background:var(--olive)">Improve</div>
+            <div><strong>Adoption + workflow fit</strong><span>Training, implementation, role-based workflows, and making underused capabilities easier to find.</span><div><span class="evidence-pill">HUMINT</span><span class="evidence-pill">CIPHER</span></div></div>
+            <div class="conf">High confidence</div>
+          </div>
+          <div class="p evidence emerging">
+            <div class="tag" style="background:var(--terracotta)">Build</div>
+            <div><strong>Outcome + payer intelligence</strong><span>Make outcomes easier to pull together and easier to explain to different audiences.</span><div><span class="evidence-pill">Fringe map</span><span class="evidence-pill">2026 signals</span></div></div>
+            <div class="conf">Medium-high</div>
+          </div>
+          <div class="p evidence watch">
+            <div class="tag" style="background:var(--gold)">Explore</div>
+            <div><strong>Broader care-journey connections</strong><span>Keep watching screening, long-term records, caregiver support, and how information follows the patient across systems.</span><div><span class="evidence-pill">Asia watch</span><span class="evidence-pill">Weak signal</span></div></div>
+            <div class="conf">Watchlist</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bottom">
+    <div class="callout">
+      <div class="section-label">The question I want this visual to raise</div>
+      <div class="big">Should CentralReach keep competing on the <mark>number of capabilities</mark>, or put more focus on the full path from capability to <mark>actual customer value</mark>?</div>
+      <div class="small" style="margin-top:10px">The point is not to force one feature recommendation. It shows where the research is starting to come together and where there is still a real strategic choice.</div>
+    </div>
+    <div class="callout sources">
+      <div class="section-label">Source drawer</div>
+      <h2 style="font-size:20px;margin-bottom:8px">Current signals used</h2>
+      <a href="https://centralreach.com/products/reportdraftai/" target="_blank">CentralReach ReportDraftAI (2026)</a>
+      <a href="https://centralreach.com/blog/centralreach-expands-payor-strategy-to-improve-access-outcomes-and-cost-in-autism-and-idd-care/" target="_blank">CentralReach payor strategy (2026)</a>
+      <a href="https://www.cms.gov/newsroom/fact-sheets/cms-interoperability-prior-authorization-final-rule-cms-0057-f" target="_blank">CMS interoperability & prior authorization</a>
+      <a href="https://ai4asd.tech/" target="_blank">HKUST AI4ASD (2026)</a>
+      <div class="small" style="margin-top:8px">Course evidence also includes HUMINT, competitor analysis, BMA and SWOT, social media scanning, CIPHER, and scenario work.</div>
+    </div>
+  </div>
+</div>
+
+<div id="tip" class="tooltip"></div>
+<script>
+const buttons=[...document.querySelectorAll('button[data-filter]')];
+buttons.forEach(b=>b.addEventListener('click',()=>{
+  buttons.forEach(x=>x.classList.remove('active')); b.classList.add('active');
+  const f=b.dataset.filter;
+  document.querySelectorAll('.evidence').forEach(el=>{
+    el.classList.toggle('hidden', f!=='all' && !el.classList.contains(f));
+  });
+}));
+const tip=document.getElementById('tip');
+document.querySelectorAll('[data-tip]').forEach(el=>{
+  el.addEventListener('mouseenter', e=>{tip.textContent=el.dataset.tip;tip.style.display='block'});
+  el.addEventListener('mousemove', e=>{tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY+14)+'px'});
+  el.addEventListener('mouseleave', ()=>tip.style.display='none');
+});
+
+const chainInfo=[
+  ['Capability','The function exists, but that alone does not create value.','Evidence: BMA, competitor review, product breadth.'],
+  ['Adoption','Users have to know the capability exists and understand how to use it.','Evidence: HUMINT, implementation and training findings.'],
+  ['Workflow fit','A capability can be adopted and still create extra clicks or duplicate work.','Evidence: role-based usability findings, CIPHER contradictions.'],
+  ['Proven value','The benefit becomes stronger when it can be shown through time saved, clearer outcomes, or better payer communication.','Evidence: outcome pressure, ReportDraftAI, payer strategy.'],
+  ['Advantage','The capability becomes harder to copy when the customer can actually feel the difference.','Strategic implication: compete on realized value, not just feature count.']
+];
+const chainNodes=[...document.querySelectorAll('.chain .node')];
+const panel=document.getElementById('insightPanel');
+const bars=[...document.querySelectorAll('.progress div')];
+chainNodes.forEach((n,i)=>n.addEventListener('click',()=>{
+  chainNodes.forEach(x=>x.classList.remove('selected')); n.classList.add('selected');
+  bars.forEach((b,j)=>b.classList.toggle('on',j<=i));
+  panel.innerHTML='<h3>'+chainInfo[i][0]+'</h3><p>'+chainInfo[i][1]+'<br><b>'+chainInfo[i][2]+'</b></p>';
+}));
+
+document.querySelectorAll('.pressure,.p,.quad').forEach(el=>el.addEventListener('click',()=>{
+  el.classList.toggle('selected');
+}));
+</script>
+</body>
+</html>
